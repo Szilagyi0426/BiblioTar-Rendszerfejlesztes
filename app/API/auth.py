@@ -27,5 +27,3 @@ def change_username(user_data: ChangeUserName):
 @router.get("/changeEmail")
 def change_email(user_data: ChangeUserEmail):
     return {"message": "Email megváltoztatása sikeres"}
-
-
