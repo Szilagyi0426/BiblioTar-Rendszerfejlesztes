@@ -1,70 +1,71 @@
 from fastapi import FastAPI, APIRouter
+from app.schemas import user
 
 router = APIRouter()
 
 #-------------User data change requests---------------
-@router.get("/changeAddress")
-def change_address():
-    return {"message": "Change Address"}
+@router.put("/changeAddress", )
+def change_address(changeAddress: user.ChangeAddress):
+    return "Valid data"
 
-@router.get("/changePhoneNumer")
-def change_phoneNumber():
-    return {"message": "Change Phone Number"}
+@router.put("/changePhoneNumer")
+def change_phoneNumber(changePhoneNumber: user.ChangePhoneNumber):
+    return "Valid data"
 
-@router.get("/changeEmail")
-def change_emaul():
-    return {"message": "Change Email"}
+@router.put("/changeEmail")
+def change_email(changeEmail: user.ChangeEmail):
+    return "Valid data"
 
-@router.get("/changeUsername")
-def change_username():
-    return {"message": "Change Username"}
+@router.put("/changeUsername")
+def change_username(changeUsername: user.ChangeUsername):
+    return "Valid data"
 
-@router.get("/changePassword")
-def change_password():
-    return {"message": "Change Password"}
+@router.put("/changePassword")
+def change_password(changePassword: user.ChangePassword):
+    return "Valid data"
 #-----------------------------------------------------
 
 
 #-------------------Data listings---------------------
 @router.get("/listBooks")
-def list_books():
-    return {"message": "List of books"}
+def list_books(listBooks: user.ListBooks):
+    return "Valid data"
 
 @router.get("/listRentedBooks")
-def list_rentedBooks():
-    return {"message": "List of Rented books"}
+def list_rentedBooks(listRendtedBooks: user.ListRendtedBooks):
+    return "Valid data"
 
 @router.get("/listPersonalRents")
-def list_personalRents():
-    return {"message": "List of Personal Rents"}
+def list_personalRents(listPersonalRents: user.ListPersonalRents):
+    return "Valid data"
 
 @router.get("/listPersonalFines")
-def list_peronslaFines():
-    return {"message": "List of Personal Fines"}
+def list_peronalFines(listPersonalFines: user.ListPersonalFines):
+    return "Valid data"
 #-----------------------------------------------------
 
 
 #---------------Book renting related------------------
-@router.get("/rentBook")
-def rent_book():
-    return {"message": "Rent Book"}
+@router.put("/rentBook")
+def rent_book(rentBook: user.RentBook):
+    return "Valid data"
 
-@router.get("/rentCancel")
-def rent_cancel():
-    return {"message": "Cancel Rent"}
+@router.put("/rentCancel")
+def rent_cancel(rentCancel: user.RentCancel):
+    return "Valid data"
 
-@router.get("/rentExtend")
-def rent_extend():
-    return {"message": "Extend Rent"}
+@router.put("/rentExtend")
+def rent_extend(rentExtend: user.RentExtend):
+    return "Valid data"
 #-----------------------------------------------------
 
 
 #--------------------Other calls----------------------
-@router.get("/payFine")
-def pay_fine():
-    return {"message": "Pay Fine"}
+@router.put("/payFine")
+def pay_fine(payFine: user.PayFine):
+    return "Valid data"
 
-@router.get("/preRentBook")
-def pre_rentBook():
-    return {"message": "Pre-rent Book"}
+@router.put("/preRentBook")
+def pre_rentBook(preRentBook: user.PreRentBook):
+    return "Valid data"
 #-----------------------------------------------------
