@@ -1,71 +1,104 @@
-from fastapi import FastAPI, APIRouter
-from app.schemas import user
+from fastapi import FastAPI, APIRouter, Depends, HTTPException, status
+from app.schemas.user import *
+from app.API.auth import get_current_user
+from app.database import get_db
+from sqlalchemy.orm import Session
+from app.models import *
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(get_current_user)] 
+)
+
+def dependecyCheck(current_user: dict = Depends(get_current_user)) -> dict:
+    if current_user.get("role") != "": # Ha a felhasználó nem admin
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Nincs bejelentkezve!" # Hibát dob
+        )
+    return current_user
 
 #-------------User data change requests---------------
-@router.put("/changeAddress", )
-def change_address(changeAddress: user.ChangeAddress):
-    return "Valid data"
+@router.post("/changeAddress", dependencies=[Depends(dependecyCheck)])
+def change_address(newAddress: ChangeAddress, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    users = db.query(User).filter(User.username == current_user["username"]).first()
+    users.address = newAddress.address
+    db.commit()
+    return "Sikeres adatmódosítás!"
 
-@router.put("/changePhoneNumer")
-def change_phoneNumber(changePhoneNumber: user.ChangePhoneNumber):
-    return "Valid data"
+@router.post("/changePhoneNumer", dependencies=[Depends(dependecyCheck)])
+def change_phoneNumber(newPhoneNumber: ChangePhoneNumber, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    users = db.query(User).filter(User.username == current_user["username"]).first()
+    users.phonenumber = newPhoneNumber.phoneNumber
+    db.commit()
+    return "Sikeres adatmódosítás!"
 
-@router.put("/changeEmail")
-def change_email(changeEmail: user.ChangeEmail):
-    return "Valid data"
+@router.post("/changeEmail", dependencies=[Depends(dependecyCheck)])
+def change_email(newEmail: ChangeEmail, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    users = db.query(User).filter(User.username == current_user["username"]).first()
+    users.email = newEmail.email
+    db.commit()
+    return "Sikeres adatmódosítás!"
 
-@router.put("/changeUsername")
-def change_username(changeUsername: user.ChangeUsername):
-    return "Valid data"
+@router.post("/changeUsername", dependencies=[Depends(dependecyCheck)])
+def change_username(newUsername: ChangeUsername, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    users = db.query(User).filter(User.username == current_user["username"]).first()
+    users.username = newUsername.username
+    db.commit()
+    return "Sikeres adatmódosítás!"
 
-@router.put("/changePassword")
-def change_password(changePassword: user.ChangePassword):
-    return "Valid data"
+@router.post("/changePassword", dependencies=[Depends(dependecyCheck)])
+def change_password(newPassword: ChangePassword, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    users = db.query(User).filter(User.username == current_user["username"]).first()
+    users.password = newPassword.password
+    db.commit()
+    return "Sikeres adatmódosítás!"
 #-----------------------------------------------------
 
 
 #-------------------Data listings---------------------
-@router.get("/listBooks")
-def list_books(listBooks: user.ListBooks):
+@router.get("/listBooks", response_model=ListBooks, dependencies=[Depends(dependecyCheck)])
+def list_books(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    bookList = db.query(Book)
     return "Valid data"
 
-@router.get("/listRentedBooks")
-def list_rentedBooks(listRendtedBooks: user.ListRendtedBooks):
+@router.get("/listRentedBooks", response_model=ListRendtedBooks, dependencies=[Depends(dependecyCheck)])
+def list_rentedBooks(listRendtedBooks: ListRendtedBooks, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    userID = db.query(User).filter(User.username == current_user["username"]).first()
+    reservationList = db.query(Reservation).filter(Reservation.userId == userID.id).all()
+    #reservationList.filter(userID.id == reservationList.)
     return "Valid data"
 
-@router.get("/listPersonalRents")
-def list_personalRents(listPersonalRents: user.ListPersonalRents):
+@router.get("/listPersonalRents", response_model=ListPersonalRents, dependencies=[Depends(dependecyCheck)])
+def list_personalRents(listPersonalRents: ListPersonalRents, current_user = Depends(get_current_user)):
     return "Valid data"
 
-@router.get("/listPersonalFines")
-def list_peronalFines(listPersonalFines: user.ListPersonalFines):
+@router.get("/listPersonalFines", response_model=ListPersonalFines, dependencies=[Depends(dependecyCheck)])
+def list_peronalFines(listPersonalFines: ListPersonalFines, current_user = Depends(get_current_user)):
     return "Valid data"
 #-----------------------------------------------------
 
 
 #---------------Book renting related------------------
-@router.put("/rentBook")
-def rent_book(rentBook: user.RentBook):
+@router.post("/rentBook", dependencies=[Depends(dependecyCheck)])
+def rent_book(rentBook: RentBook, current_user = Depends(get_current_user)):
     return "Valid data"
 
-@router.put("/rentCancel")
-def rent_cancel(rentCancel: user.RentCancel):
+@router.post("/rentCancel", dependencies=[Depends(dependecyCheck)])
+def rent_cancel(rentCancel: RentCancel, current_user = Depends(get_current_user)):
     return "Valid data"
 
-@router.put("/rentExtend")
-def rent_extend(rentExtend: user.RentExtend):
+@router.post("/rentExtend", dependencies=[Depends(dependecyCheck)])
+def rent_extend(rentExtend: RentExtend, current_user = Depends(get_current_user)):
     return "Valid data"
 #-----------------------------------------------------
 
 
 #--------------------Other calls----------------------
-@router.put("/payFine")
-def pay_fine(payFine: user.PayFine):
+@router.post("/payFine", dependencies=[Depends(dependecyCheck)])
+def pay_fine(payFine: PayFine, current_user = Depends(get_current_user)):
     return "Valid data"
 
-@router.put("/preRentBook")
-def pre_rentBook(preRentBook: user.PreRentBook):
+@router.post("/preRentBook", dependencies=[Depends(dependecyCheck)])
+def pre_rentBook(preRentBook: PreRentBook, current_user = Depends(get_current_user)):
     return "Valid data"
 #-----------------------------------------------------
