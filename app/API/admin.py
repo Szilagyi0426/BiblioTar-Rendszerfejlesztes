@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.schemas import admin
-from app.api.auth import get_current_user
+from app.API.auth import get_current_user
 
 router = APIRouter()
 #-----------------Admin book management ------------------
