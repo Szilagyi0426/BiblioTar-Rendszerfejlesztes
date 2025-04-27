@@ -28,3 +28,7 @@ class UpdateBook(BaseModel):
 class DeleteBook(BaseModel):
     id: int
 
+class UpdateUserRole(BaseModel):
+    user_id: int
+    new_role: str
+

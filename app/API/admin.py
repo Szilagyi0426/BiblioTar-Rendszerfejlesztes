@@ -16,4 +16,10 @@ def update_book(bookUpdate: admin.UpdateBook):
 def delete_book(bookDelete: admin.DeleteBook):
     return "Book deleted"
 
+# -----------------Admin user management ------------------
+
+@router.patch("/updateUserRole")
+def update_user_role(roleUpdate: admin.UpdateUserRole):
+    return f"User {roleUpdate.user_id} role updated to {roleUpdate.new_role}"
+
 #-----------------------------------------------------
