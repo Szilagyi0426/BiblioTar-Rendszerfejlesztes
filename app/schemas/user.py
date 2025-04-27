@@ -1,5 +1,5 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
+from typing import Optional
+from pydantic import BaseModel, EmailStr
 
 #--------------------------------------
 class ChangeAddress(BaseModel):
@@ -9,7 +9,7 @@ class ChangePhoneNumber(BaseModel):
     phoneNumber: str
 
 class ChangeEmail(BaseModel):
-    email: str
+    email: EmailStr
 
 class ChangeUsername(BaseModel):
     username: str
