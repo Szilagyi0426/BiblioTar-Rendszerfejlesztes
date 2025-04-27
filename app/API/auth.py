@@ -1,14 +1,13 @@
-from app.schemas.auth import *
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
+from app.schemas.auth import UserLogin, CreateUser, UserResponse
 from app.config import settings
 import jwt
 import datetime
 from passlib.context import CryptContext
-
 
 router = APIRouter()
 security = HTTPBearer()
@@ -20,11 +19,11 @@ blacklist = set()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def hash_password(password: str) -> str:
-    """Jelszó hash-elése."""
+    #Jelszó hash-elése.
     return pwd_context.hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Ellenőrzi, hogy a plain jelszó megfelel-e a hash-elt jelszónak."""
+    #Ellenőrzi, hogy a plain jelszó megfelel-e a hash-elt jelszónak.
     return pwd_context.verify(plain_password, hashed_password)
 
 # --- Token műveletek ---
@@ -34,8 +33,8 @@ def create_token(subject: str, expires_delta: int, additional_claims: dict = Non
     JWT token létrehozása a megadott subject, lejárati idő (másodpercben)
     és extra claim-ek alapján.
     """
-    expire = datetime.datetime.utcnow() + datetime.timedelta(seconds=expires_delta)
-    payload = {"sub": subject, "exp": int(expire.timestamp())}
+    expire = datetime.datetime.utcnow() + datetime.timedelta(seconds=expires_delta) # Jelenlegi idő + lejárati idő
+    payload = {"sub": subject, "exp": expire}
     if additional_claims:
         payload.update(additional_claims)
     token = jwt.encode(payload, settings.authjwt_secret_key, algorithm="HS256")
@@ -80,52 +79,17 @@ def refresh_access_token(refresh_token: str) -> str:
     )
     return new_access_token
 
-@router.post("/register",  response_model=UserResponse)
-def register(user_data: CreateUser, db: Session = Depends(get_db)):
-    """
-   Regisztráció:
-     - Ellenőrzi, hogy a felhasználónév nem foglalt.
-     - Létrehozza az új felhasználót, a jelszót hash-eli,
-       majd tokeneket generál az auth modul segítségével.
-   """
-    existing_user = db.query(User).filter(User.username == user_data.username).first()
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="A felhasználónév már foglalt"
-        )
-    new_user = User(**user_data.dict())
-    new_user.password = hash_password(user_data.password)
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    additional_claims = {"role": "user"}
-    access_token = create_token(
-        subject=new_user.username,
-        expires_delta=settings.authjwt_access_token_expires,
-        additional_claims=additional_claims
-    )
-    refresh_token = create_token(
-        subject=new_user.username,
-        expires_delta=settings.authjwt_refresh_token_expires,
-        additional_claims={"refresh": True}
-    )
-    return UserResponse(
-        username=new_user.username,
-        email=new_user.email,
-        role=additional_claims["role"],
-        access_token=access_token,
-        refresh_token=refresh_token
-    )
+# --- API végpontok ---
 
-@router.post("/login", response_model=UserResponse)
+# Bejelentkezés API végpont
+@router.post("/login", response_model=UserResponse, tags=["auth"])
 def login(user_data: UserLogin, db: Session = Depends(get_db)):
     """
-   Bejelentkezés:
-     - Ellenőrzi, hogy a felhasználó létezik és a jelszó helyes.
-     - Siker esetén az auth modul create_token() függvényével generálja az access és refresh tokeneket.
-     - A tokenek payload-jában szerepel a felhasználó role-ja.
-   """
+    Bejelentkezés:
+      - Ellenőrzi, hogy a felhasználó létezik és a jelszó helyes.
+      - Siker esetén az auth modul create_token() függvényével generálja az access és refresh tokeneket.
+      - A tokenek payload-jában szerepel a felhasználó role-ja.
+    """
     user = db.query(User).filter(User.username == user_data.username).first()
     if not user or not verify_password(user_data.password, user.password):
         raise HTTPException(
@@ -138,12 +102,15 @@ def login(user_data: UserLogin, db: Session = Depends(get_db)):
         expires_delta=settings.authjwt_access_token_expires,
         additional_claims=additional_claims
     )
+    # A refresh_token új tokent generál, de nem tartalmaz extra claim-eket
     refresh_token = create_token(
         subject=user.username,
         expires_delta=settings.authjwt_refresh_token_expires,
         additional_claims={"refresh": True}
     )
+    # Visszaadja a felhasználó adatait és a tokeneket
     return UserResponse(
+        userid = user.id,
         username=user.username,
         email=user.email,
         role=additional_claims["role"],
@@ -151,21 +118,60 @@ def login(user_data: UserLogin, db: Session = Depends(get_db)):
         refresh_token=refresh_token
     )
 
-@router.delete("/logout")
+# Regisztráció API végpont
+@router.post("/register", response_model=UserResponse, tags=["auth"])
+def register(user_data: CreateUser, db: Session = Depends(get_db)):
+    """
+    Regisztráció:
+      - Ellenőrzi, hogy a felhasználónév nem foglalt.
+      - Létrehozza az új felhasználót, a jelszót hash-eli,
+        majd tokeneket generál az auth modul segítségével.
+    """
+    existing_user = db.query(User).filter(User.username == user_data.username).first()
+    if existing_user: # Ha már létezik a felhasználó
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="A felhasználónév már foglalt"
+        )
+    new_user = User(**user_data.dict()) # Új felhasználó létrehozása
+    new_user.password = hash_password(user_data.password)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    additional_claims = {"role": "user"} # Felhasználó alapértelmezett role-ja
+    access_token = create_token( # Access token generálása
+        subject=new_user.username,
+        expires_delta=settings.authjwt_access_token_expires,
+        additional_claims=additional_claims
+    )
+    refresh_token = create_token( # Refresh token generálása
+        subject=new_user.username,
+        expires_delta=settings.authjwt_refresh_token_expires,
+        additional_claims={"refresh": True}
+    )
+    return UserResponse( # Visszaadja a felhasználó adatait és a tokeneket
+        username=new_user.username,
+        userId = new_user.id,
+        email=new_user.email,
+        role=additional_claims["role"],
+        access_token=access_token,
+        refresh_token=refresh_token
+    )
+
+# Kijelentkezés API végpont
+@router.delete("/logout", tags=["auth"])
 def logout(credentials: HTTPAuthorizationCredentials = Depends(security)):
     """
     Kijelentkezés:
       - Az Authorization headerből kinyert token-t hozzáadja a blacklisthez,
         így később nem használható.
     """
-    token = credentials.credentials
-    blacklist.add(token)
+    token = credentials.credentials # Token kinyerése az Authorization headerből
+    blacklist.add(token) # Token hozzáadása a blacklisthez
     return {"msg": "Sikeres kijelentkezés"}
 
-
-
-@router.post("/token/refresh", response_model=UserResponse)
-def refresh(request: Request):
+@router.post("/refresh", response_model=UserResponse, tags=["auth"])
+def refresh_endpoint(request: Request):
     """
     Token frissítés:
       - Az Authorization headerből kinyeri a refresh token-t,
@@ -173,18 +179,38 @@ def refresh(request: Request):
       - A válaszban visszaküldi az új access token-t.
     """
     auth_header = request.headers.get("Authorization")
-    
     if not auth_header:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token hiányzik")
-    try: 
+    try:
         scheme, token = auth_header.split()
         if scheme.lower() != "bearer":
             raise ValueError("Érvénytelen hitelesítési séma")
     except Exception:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Érvénytelen Authorization header")
-    if token in blacklist:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token tiltólistán van")
-
     new_access_token = refresh_access_token(token)
-    blacklist.add(token)
-    return TokenOnlyResponse(access_token=new_access_token)
+    return UserResponse(
+        userId = "",
+        username="",
+        email="",
+        role="",
+        access_token=new_access_token,
+        refresh_token=""
+    )
+
+# Profil lekérdezés API végpont
+@router.get("/profile", response_model=UserResponse, tags=["auth"])
+def profile(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    """
+    Profil lekérdezés:
+      - A get_current_user dependency segítségével kinyeri a felhasználó azonosítóját és role értékét.
+      - Az adatbázisból visszaadja a felhasználó adatait, beleértve a role értékét.
+    """
+    user = db.query(User).filter(User.username == current_user["username"]).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Felhasználó nem található")
+    return UserResponse(
+        userId = user.id,
+        username=user.username,
+        email=user.email,
+        role=current_user["role"]
+    )
