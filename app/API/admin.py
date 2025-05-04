@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.schemas.admin import NewBook, UpdateBook, DeleteBook, UpdateUserRole
-from app.auth import get_current_user
+from app.API.auth import get_current_user
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.book import Book

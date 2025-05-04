@@ -3,7 +3,8 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
-from app.schemas.auth import UserLogin, CreateUser, UserResponse
+from app.schemas.auth import UserLogin, \
+    CreateUser, UserResponse, userProfile
 from app.config import settings
 import jwt
 import datetime
@@ -198,19 +199,18 @@ def refresh_endpoint(request: Request):
     )
 
 # Profil lekérdezés API végpont
-@router.get("/profile", response_model=UserResponse, tags=["auth"])
-def profile(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
-    """
-    Profil lekérdezés:
-      - A get_current_user dependency segítségével kinyeri a felhasználó azonosítóját és role értékét.
-      - Az adatbázisból visszaadja a felhasználó adatait, beleértve a role értékét.
-    """
+@router.get("/profile", response_model=userProfile, tags=["auth"])
+def profile(
+        current_user: dict = Depends(get_current_user),
+        db: Session = Depends(get_db),
+):
     user = db.query(User).filter(User.username == current_user["username"]).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Felhasználó nem található")
-    return UserResponse(
-        userId = user.id,
+        raise HTTPException(status_code=404, detail="Felhasználó nem található")
+    return userProfile(
         username=user.username,
         email=user.email,
-        role=current_user["role"]
+        role=current_user["role"],
+        address=user.address or "",
+        phonenumber=user.phonenumber or "",
     )
