@@ -1,0 +1,166 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9fafb;
+    color: #1f2937;
+}
+
+.home-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #c3c3c3;
+    padding: 0.75rem 2rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+}
+
+.navbar-logo img.logo {
+    height: 140px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+    margin-top: -45px;
+    margin-bottom: -45px;
+}
+
+.navbar-logo:hover {
+    cursor: pointer;
+}
+
+/* Profile wrapper now flex-aligned */
+.profile-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+/* Username text styling */
+.profile-wrapper .username {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #1f2937;
+    transition: color 0.2s ease;
+}
+
+.profile-wrapper:hover .username {
+    color: #2563eb;
+}
+
+
+.profile-icon {
+    transition: transform 0.2s ease;
+    color: #1f2937;
+}
+
+.profile-icon:hover {
+    transform: scale(1.1);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 4.5rem;
+    right: 0;
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    min-width: 160px;
+    padding: 0.5rem 0;
+}
+
+.dropdown-menu button {
+    background: none;
+    border: none;
+    padding: 0.75rem 1.25rem;
+    text-align: left;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    color: #1f2937;
+}
+
+.dropdown-menu button:hover {
+    background-color: #f3f4f6;
+}
+
+.main-content {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.welcome-card {
+    background-color: white;
+    padding: 2.5rem 3rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+    text-align: center;
+    max-width: 640px;
+    width: 100%;
+}
+
+.welcome-card h1 {
+    margin-bottom: 1rem;
+    font-size: 2rem;
+    color: #111827;
+}
+
+.welcome-card p {
+    color: #4b5563;
+    font-size: 1rem;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #d1d5db;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #6b7280;
+}
+
+
+.navbar-center {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.navbar-center button {
+    background: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #1f2937;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.navbar-center button:hover {
+    background-color: rgba(37, 99, 235, 0.1); /* light blue highlight */
+    color: #2563eb;
+}
+
+.navbar-center button:active {
+    background-color: rgba(37, 99, 235, 0.2);
+}
+
