@@ -34,3 +34,11 @@ class UserResponse(BaseModel):
 class TokenOnlyResponse(BaseModel):
     access_token: str
     refresh_token: Optional[str] = None
+    
+class userProfile(BaseModel):
+    username: str
+    email: EmailStr
+    role: str
+    address: Optional[str] = ""
+    phonenumber: Optional[str] = ""
+

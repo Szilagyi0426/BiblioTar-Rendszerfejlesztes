@@ -1,0 +1,164 @@
+/* auth.css */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f3f4f6;
+}
+
+.login-container {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    padding-top: 0;
+    box-sizing: border-box;
+}
+
+.login-box {
+    background-color: white;
+    padding: 2rem;
+    padding-top:0;
+    border-radius: 1.25rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-box h2 {
+    padding-top: 0;
+    margin-top: 0;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.login-box .error {
+    color: #ef4444;
+    text-align: center;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+.login-box label {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: #4b5563;
+}
+
+.login-box input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.6rem 0.75rem;
+    margin-bottom: 1.25rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background-color: #fff;
+}
+
+.login-box input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    outline: none;
+}
+
+.login-box button {
+    margin-top: 0.5rem;
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.login-box button:hover {
+    background-color: #1d4ed8;
+}
+
+.toast {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    color: white;
+    padding: 0 3rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+    font-weight: 500;
+}
+
+.toast.error {
+    background-color: #ef4444;
+}
+
+.toast.success {
+    background-color: #22c55e;
+}
+
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+}
+
+.register-redirect {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.register-button {
+    width: 80% !important;
+    background-color: unset !important;
+    color: black !important;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.register-button:hover {
+    background-color: #eee !important;
+    border-color: #2563eb;
+    color: black;
+}
+
+.login-logo {
+    display: block;
+    margin: 0 auto 1rem auto;
+    max-width: 150px;
+    height: auto;
+}
+
+
