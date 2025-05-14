@@ -54,7 +54,7 @@ export async function setPersonalData(address: string, phoneNumber: string) {
     body: JSON.stringify({ address }),
   });
 
-  const setPhoneNumberResponse = await fetch(`${API_BASE}/userAPIs/changePhoneNumer`, {
+  const setPhoneNumberResponse = await fetch(`${API_BASE}/userAPIs/changePhoneNumber`, {
     method: "POST",
     headers,
     body: JSON.stringify({ phoneNumber }),
