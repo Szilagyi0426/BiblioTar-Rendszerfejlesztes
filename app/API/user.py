@@ -16,7 +16,7 @@ def change_address(newAddress: ChangeAddress, db: Session = Depends(get_db), cur
     db.commit()
     return "Sikeres adatmódosítás!"
 
-@router.post("/changePhoneNumer")
+@router.post("/changePhoneNumber")
 def change_phoneNumber(newPhoneNumber: ChangePhoneNumber, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     users = db.query(User).filter(User.username == current_user["username"]).first()
     users.phonenumber = newPhoneNumber.phoneNumber

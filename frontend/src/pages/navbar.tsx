@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { useNavigate, Outlet } from "react-router-dom";
-import { ReactComponent as UserIcon } from "../assets/user-icon.svg";
 import "./navbar.css";
 import { API_BASE } from "../api";
 
