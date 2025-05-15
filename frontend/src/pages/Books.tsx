@@ -19,6 +19,19 @@ function Modal({ show, onClose, children }: { show: boolean, onClose: () => void
 }
 
 export function ListBooks() {
+    const [toastMessage, setToastMessage] = useState("");
+    const [toastType, setToastType] = useState<"success" | "error" | "">("");
+    const [showToast, setShowToast] = useState(false);
+
+    useEffect(() => {
+        if (showToast) {
+            const timer = setTimeout(() => {
+                setShowToast(false);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [showToast]);
+
   const [html, setHTML] = useState<{__html: string}>({__html: ""});
   const [showModal, setShowModal] = useState(false);
   const [startDate, setStartDate] = useState(() => {
@@ -103,7 +116,9 @@ useEffect(() => {
 const handleReserve = async (e: React.FormEvent) => {
   e.preventDefault();
   if (!selectedBookId) {
-    alert("Nincs kiválasztott könyv!");
+    setToastMessage("Nincs kiválasztott könyv!");
+    setToastType("error");
+    setTimeout(() => setToastMessage(""), 3000);
     return;
   }
   const token = localStorage.getItem("access_token");
@@ -122,11 +137,17 @@ const handleReserve = async (e: React.FormEvent) => {
     }),
   });
     if (response.ok) {
-      alert("Sikeres foglalás!");
+      setToastMessage("Sikeres foglalás!");
+      setToastType("success");
+      setShowToast(true);
+      setTimeout(() => setToastMessage(""), 3000);
       setShowModal(false);
     } else {
       const error = await response.json();
-      alert(error.detail || "Hiba történt a foglalás során.");
+      setToastMessage(error.detail || "Hiba történt a foglalás során.");
+      setToastType("error");
+      setShowToast(true);
+      setTimeout(() => setToastMessage(""), 3000);
     }
   };
 
@@ -134,37 +155,95 @@ const handleReserve = async (e: React.FormEvent) => {
     <>
       <div id="book-list-container" dangerouslySetInnerHTML={html} />
       <Modal show={showModal} onClose={() => setShowModal(false)}>
-        <h2>Könyv kölcsönzése</h2>
-        <form onSubmit={handleReserve}>
-        <label>
-          Kölcsönzés kezdete:   
-          <input
-            type="date"
-            value={startDate}
-            min={new Date().toISOString().split("T")[0]}
-            onChange={e => {
-              setStartDate(e.target.value);
-              // Optionally reset endDate if it's before new startDate
-              if (endDate < e.target.value) setEndDate(e.target.value);
+        <div         
+        style={{
+          background: "#fff",
+          padding: "1em",
+          borderRadius: "8px",
+          minWidth: "220px",
+          minHeight: "120px",
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          overflow: "visible", // ensure absolutely positioned children are visible
+        }}>
+          <button
+            type="button"
+            onClick={() => setShowModal(false)}
+            className="buttonStyle"
+            style={{
+              position: "absolute",
+              top: "1em",
+              right: "1em",
+              background: "#fff",
+              border: "1px solid #ccc",
+              fontSize: "1em",
+              cursor: "pointer",
+              zIndex: 10,
+              padding: "0.3em 1em",
             }}
-          />
-        </label>
-        <br />
-        <label>
-          Kölcsönzés lejárata:   
-          <input
-            type="date"
-            value={endDate}
-            min={startDate}
-            max={maxEndDate}
-            onChange={e => setEndDate(e.target.value)}
-          />
-        </label>
-        <br />
-        <button type="submit" className="buttonStyle">Foglalás</button>
-        <button type="button" onClick={() => setShowModal(false)} className="buttonStyle" style={{marginLeft: "1em"}}>Bezárás</button>
-      </form>
+          >
+            Bezárás
+          </button>
+          <form 
+            onSubmit={handleReserve}
+            style={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            position: "static", // <-- ensure this is NOT relative
+            marginTop: "3em",
+          }}>
+            <label>
+              Kölcsönzés kezdete:
+              <input
+                type="date"
+                value={startDate}
+                min={new Date().toISOString().split("T")[0]}
+                onChange={e => {
+                  setStartDate(e.target.value);
+                  if (endDate < e.target.value) setEndDate(e.target.value);
+                }}
+                style={{
+                  marginLeft: "0.5em",
+                }}
+              />
+            </label>
+            <br />
+            <label>
+              Kölcsönzés lejárata:
+              <input
+                type="date"
+                value={endDate}
+                min={startDate}
+                max={maxEndDate}
+                onChange={e => setEndDate(e.target.value)}
+                style={{
+                  marginLeft: "0.5em",
+                }}
+              />
+            </label>
+            <br />
+            {/* Centered Foglalás button */}
+            <button
+              type="submit"
+              className="buttonStyle"
+              style={{
+                alignSelf: "center",
+                minWidth: "120px",
+                padding: "1em 3em",
+              }}
+            >
+              Foglalás
+            </button>
+          </form>
+        </div>
       </Modal>
+      <div className={`toast ${toastType}`} style={{ display: showToast ? "block" : "none" }}>
+        {toastMessage}
+      </div>
     </>
   );
 }

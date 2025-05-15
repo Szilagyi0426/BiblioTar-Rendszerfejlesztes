@@ -8,13 +8,16 @@ class ChangePhoneNumber(BaseModel):
     phoneNumber: str
 
 class ChangeEmail(BaseModel):
-    email: EmailStr
+    email: str
+    password: str
 
 class ChangeUsername(BaseModel):
     username: str
+    password: str
 
 class ChangePassword(BaseModel):
-    password: str
+    passwordNew: str
+    passwordOld: str
 
 
 #--------------------------------------

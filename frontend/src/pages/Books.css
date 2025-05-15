@@ -129,3 +129,24 @@ li div:hover {
 li .buttonStyle {
     margin-left: auto;
 }
+
+.toast {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    color: white;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+    font-weight: 500;
+}
+
+.toast.error {
+    background-color: #ef4444;
+}
+
+.toast.success {
+    background-color: #22c55e;
+}

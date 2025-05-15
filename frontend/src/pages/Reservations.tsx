@@ -66,8 +66,7 @@ function EditRentalModal({
         zIndex: 1000,
       }}
     >
-      <form
-        onSubmit={handleSubmit}
+      <div
         style={{
           background: "#fff",
           padding: "2em",
@@ -78,56 +77,85 @@ function EditRentalModal({
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          overflow: "visible", // ensure absolutely positioned children are visible
         }}
       >
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            position: "static", // <-- ensure this is NOT relative
+            marginTop: "2em",
+          }}
+        >
+          <button
+            className="buttonStyle"
+            style={{ marginBottom: "2em", width: "100%" }}
+            type="submit"
+            name="cancel"
+          >
+            Kölcsönzés törlése
+          </button>
+          <label style={{ width: "100%", textAlign: "center", marginBottom: "1em" }}>
+            Új lejárati dátum:
+            <input
+              type="date"
+              value={selectedDate}
+              min={minDate}
+              max={maxDate}
+              onChange={e => setSelectedDate(e.target.value)}
+              style={{ display: "block", margin: "1em auto", width: "100%" }}
+            />
+          </label>
+          <button
+            className="buttonStyle"
+            type="submit"
+            name="extend"
+            style={{ width: "100%" }}
+          >
+            Kölcsönzés hosszabítása
+          </button>
+        </form>
+        {/* Bezárás button at top right, always on top */}
         <button
           className="buttonStyle"
-          style={{ marginBottom: "2em", width: "100%" }}
-          type="submit"
-          name="cancel"
-        >
-          Kölcsönzés törlése
-        </button>
-        <label style={{ width: "100%", textAlign: "center", marginBottom: "1em" }}>
-          Új lejárati dátum:
-          <input
-            type="date"
-            value={selectedDate}
-            min={minDate}
-            max={maxDate}
-            onChange={e => setSelectedDate(e.target.value)}
-            style={{ display: "block", margin: "1em auto", width: "100%" }}
-          />
-        </label>
-        <button
-          className="buttonStyle"
-          type="submit"
-          name="extend"
-          style={{ width: "100%" }}
-        >
-          Kölcsönzés hosszabítása
-        </button>
-      </form>
-      <button
-        className="buttonStyle"
-        onClick={onClose}
-        style={{
-          position: "absolute",
-          top: "1em",
-          right: "1em",
-          background: "transparent",
-          border: "none",
-          cursor: "pointer",
-        }}
+          onClick={onClose}
+          style={{
+            position: "absolute",
+            top: "1em",
+            right: "1em",
+            background: "#fff",
+            border: "1px solid #ccc",
+            fontSize: "1em",
+            cursor: "pointer",
+            zIndex: 10, // ensure it's on top
+            padding: "0.3em 1em",
+          }}
         >
           Bezárás
         </button>
-        
+      </div>
     </div>
   );
 }
 
 export function ListRentedBooks() {
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState<"success" | "error" | "">("");
+  const [showToast, setShowToast] = useState(false);
+
+  useEffect(() => {
+      if (showToast) {
+          const timer = setTimeout(() => {
+              setShowToast(false);
+          }, 3000);
+          return () => clearTimeout(timer);
+      }
+  }, [showToast]);
+
   const [html, setHTML] = useState<{ __html: string }>({ __html: "" });
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -199,11 +227,17 @@ export function ListRentedBooks() {
       }),
     });
     if (response.ok) {
-      alert("Büntetés sikeresen kifizetve!");
-      await fetchRentedBooks(); // Refresh the list after payment
+      setToastMessage("Büntetés sikeresen kifizetve!");
+      setToastType("success");
+      setShowToast(true); // <-- show toast
+      setTimeout(() => setShowToast(false), 3000); // <-- hide after 3s
+      await fetchRentedBooks();
     } else {
       const error = await response.json();
-      alert(error.detail || "Hiba történt a fizetés során.");
+      setToastMessage(error.detail || "Hiba történt a fizetés során.");
+      setToastType("error");
+      setShowToast(true); // <-- show toast
+      setTimeout(() => setShowToast(false), 3000); // <-- hide after 3s
     }
   };
 
@@ -245,11 +279,17 @@ useEffect(() => {
       }),
     });
     if (response.ok) {
-      alert("Kölcsönzés törölve!");
+      setToastMessage("Kölcsönzés törölve!");
+      setToastType("success");
+      setShowToast(true); // <-- show toast
+      setTimeout(() => setShowToast(false), 3000); // <-- hide after 3s
       await fetchRentedBooks();
     } else {
       const error = await response.json();
-      alert(error.detail || "Hiba történt a törlés során.");
+      setToastMessage(error.detail || "Hiba történt a törlés során.");
+      setToastType("error");
+      setShowToast(true); // <-- show toast
+      setTimeout(() => setShowToast(false), 3000); // <-- hide after 3s
     }
     setShowEditModal(false);
 };
@@ -258,7 +298,10 @@ useEffect(() => {
   const handleExtendRental = async () => {
     // Validate date
     if (selectedDate < minDate || selectedDate > maxDate) {
-      alert("A kiválasztott dátum érvénytelen! Csak a mai naptól számított 3 héten belüli dátum választható.");
+      setToastMessage("A kiválasztott dátum érvénytelen! Csak a mai naptól számított 3 héten belüli dátum választható.");
+      setToastType("error");
+      setShowToast(true); // <-- show toast
+      setTimeout(() => setShowToast(false), 3000); // <-- hide after 3s
       return;
     }
     const token = localStorage.getItem("access_token");
@@ -275,11 +318,17 @@ useEffect(() => {
       }),
     });
     if (response.ok) {
-      alert("Kölcsönzés meghosszabbítva!");
+      setToastMessage("Kölcsönzés meghosszabbítva!");
+      setToastType("success");
+      setShowToast(true); // <-- show toast
+      setTimeout(() => setShowToast(false), 3000); // <-- hide after 3s
       await fetchRentedBooks();
     } else {
       const error = await response.json();
-      alert(error.detail || "Hiba történt a hosszabbítás során.");
+      setToastMessage(error.detail || "Hiba történt a hosszabbítás során.");
+      setToastType("error");
+      setShowToast(true); // <-- show toast
+      setTimeout(() => setShowToast(false), 3000); // <-- hide after 3s
     }
     setShowEditModal(false);
   };
@@ -300,6 +349,9 @@ useEffect(() => {
         minDate={minDate}
         maxDate={maxDate}
       />
+      <div className={`toast ${toastType}`} style={{ display: showToast ? "block" : "none" }}>
+        {toastMessage}
+      </div>
     </>
   );
 }

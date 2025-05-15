@@ -28,13 +28,22 @@ def change_phoneNumber(newPhoneNumber: ChangePhoneNumber, db: Session = Depends(
 @router.post("/changeEmail")
 def change_email(newEmail: ChangeEmail, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     users = db.query(User).filter(User.username == current_user["username"]).first()
+    # Use verify_password to check the password
+    if not verify_password(newEmail.password, users.password):
+        raise HTTPException(status_code=400, detail="Hibás jelszó!")
     users.email = newEmail.email
     db.commit()
     return "Sikeres adatmódosítás!"
 
 @router.post("/changeUsername")
 def change_username(newUsername: ChangeUsername, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    # Check if the new username is already taken
+    existing_user = db.query(User).filter(User.username == newUsername.username).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Ez a felhasználónév már foglalt.")
     users = db.query(User).filter(User.username == current_user["username"]).first()
+    if not verify_password(newUsername.password, users.password):
+        raise HTTPException(status_code=400, detail="Hibás jelszó!")
     users.username = newUsername.username
     db.commit()
     return "Sikeres adatmódosítás!"
@@ -42,7 +51,9 @@ def change_username(newUsername: ChangeUsername, db: Session = Depends(get_db), 
 @router.post("/changePassword")
 def change_password(newPassword: ChangePassword, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     users = db.query(User).filter(User.username == current_user["username"]).first()
-    users.password = hash_password(newPassword.password)
+    if not verify_password(newPassword.passwordOld, users.password):
+        raise HTTPException(status_code=400, detail="Hibás jelszó!")
+    users.password = hash_password(newPassword.passwordNew)
     db.commit()
     return "Sikeres adatmódosítás!"
 #-----------------------------------------------------
