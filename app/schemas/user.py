@@ -39,10 +39,11 @@ class RentBook(BaseModel):
     endDate: str
 
 class RentCancel(BaseModel):
-    idRent: int
+    rentID: int
 
 class RentExtend(BaseModel):
-    name: str
+    rentID: int
+    newEndDate: str
 
 
 #--------------------------------------

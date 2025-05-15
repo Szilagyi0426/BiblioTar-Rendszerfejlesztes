@@ -52,16 +52,21 @@ def change_password(newPassword: ChangePassword, db: Session = Depends(get_db), 
 @router.get("/listBooks", response_class=HTMLResponse)
 def list_books(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     bookList = db.query(Book).all()
-    book_items = "".join(
-        "<li>" 
+    book_items = ""
+    for book in bookList:
+        genre = db.query(Genre).filter(Genre.id == book.genre_id).first()
+        genre_name = genre.name if genre else ""
+        book_items += (
+            "<li>"
             "<img src='/img/book-cover-placeholder.png' alt='Book Cover(placeholder)' />"
             "<div class='book-details'>"
                 f"<span>{book.title}</span>"
                 f"<span>{book.author}</span>"
             "</div>"
+            f"<span>Genre: {genre_name}</span>"
             f'<button class="buttonStyle" data-book-id="{book.id}">Kikölcsönzés</button>'
-        "</li>" for book in bookList
-    )
+            "</li>"
+        )
     html = f"""
     <html>
         <body>
@@ -107,7 +112,7 @@ def list_rentedBooks(db: Session = Depends(get_db), current_user = Depends(get_c
             )
         else:
             button_html = (
-                f'<button class="buttonStyle">Kölcsönzés szerkesztése</button>'
+                f'<button class="buttonStyle" data-borrow-id="{borrow.id}">Kölcsönzés szerkesztése</button>'
             )
         fines += (
             "<li>"
@@ -184,11 +189,31 @@ def rent_book(rentBook: RentBook, db: Session = Depends(get_db), current_user = 
 
 @router.post("/rentCancel")
 def rent_cancel(rentCancel: RentCancel, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
-    return "Valid data"
+    borrow = db.query(Borrow).filter(Borrow.id == rentCancel.rentID).first()
+    db.query(Reservation).filter(Reservation.id == borrow.reservationId).update({
+        "status": ReservationStatusEnum.cancelled
+    })
+    db.delete(borrow)
+    db.commit()
 
 @router.post("/rentExtend")
 def rent_extend(rentExtend: RentExtend, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
-    return "Valid data"
+    borrow = db.query(Borrow).filter(Borrow.id == rentExtend.rentID).first()
+    if not borrow:
+        raise HTTPException(status_code=404, detail="A kölcsönzés nem található.")
+    if borrow.noOfExtendedRental >= 2:
+        raise HTTPException(status_code=400, detail="A kölcsönzés már kétszer meg lett hosszabbítva, további hosszabbítás nem lehetséges.")
+    today_d = datetime.now()
+    today = int(today_d.timestamp() * 1000)
+    end_d = datetime.strptime(rentExtend.newEndDate, "%Y-%m-%d")
+    end = int(end_d.timestamp() * 1000)
+
+    db.query(Borrow).filter(Borrow.id == rentExtend.rentID).update({
+        "startOfRental": today,
+        "endOfRental": end,
+        "noOfExtendedRental": Borrow.noOfExtendedRental + 1
+    })
+    db.commit()
 #-----------------------------------------------------
 
 
