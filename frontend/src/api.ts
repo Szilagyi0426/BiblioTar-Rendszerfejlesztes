@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 // frontend/src/api.ts
 export const API_BASE = "http://localhost:8000";
 
@@ -59,6 +61,12 @@ export async function setPersonalData(address: string, phoneNumber: string) {
     headers,
     body: JSON.stringify({ phoneNumber }),
   });
+
+  const getListBooksResponse = await fetch(`${API_BASE}/userAPIs/listBooks`, {
+    method: "GET",
+    headers
+  });
+
 
   if (!setAddressResponse.ok || !setPhoneNumberResponse.ok) {
     throw new Error("Sikertelen személyes adatok beállítása");

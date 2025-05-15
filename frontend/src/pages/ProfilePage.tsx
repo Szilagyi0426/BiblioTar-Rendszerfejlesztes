@@ -35,7 +35,9 @@ const ProfilePage: React.FC = () => {
     const [showEmailModal, setShowEmailModal] = useState(false);
     const [newEmail, setNewEmail] = useState("");
     const [emailPassword, setEmailPassword] = useState("");
-
+    const [showUsernameModal, setShowUsernameModal] = useState(false);
+    const [newUsername, setNewUsername] = useState("");
+    const [usernamePassword, setUsernamePassword] = useState("");
 
 
     useEffect(() => {
@@ -80,6 +82,7 @@ const ProfilePage: React.FC = () => {
     
     const handlePasswordChange = async (e: React.FormEvent) => {
         e.preventDefault();
+        console.log("Sending password change data:", { currentPwd, newPwd }); // <-- log sent data
         if (newPwd !== confirmPwd) {
             setError("Az új jelszavak nem egyeznek.");
             return;
@@ -91,7 +94,7 @@ const ProfilePage: React.FC = () => {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${localStorage.getItem("access_token")}`,
                 },
-                body: JSON.stringify({ current_password: currentPwd, newPassword: newPwd }),
+                body: JSON.stringify({ passwordOld: currentPwd, passwordNew: newPwd }),
             });
             if (!res.ok) {
                 console.log("Jelszó csere sikertelen.")
@@ -163,6 +166,7 @@ const ProfilePage: React.FC = () => {
 
     const handleEmailChange = async (e: React.FormEvent) => {
         e.preventDefault();
+        console.log("Sending email change data:", { email: newEmail, password: emailPassword }); // <-- log sent data
         try {
             const res = await fetch(`${API_BASE}/userAPIs/changeEmail`, {
                 method: "POST",
@@ -172,7 +176,7 @@ const ProfilePage: React.FC = () => {
                 },
                 body: JSON.stringify({
                     email: newEmail,
-                    current_password: emailPassword,
+                    password: emailPassword,
                 }),
             });
 
@@ -193,6 +197,43 @@ const ProfilePage: React.FC = () => {
         }
     };
     
+    const handleUsernameChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+        const res = await fetch(`${API_BASE}/userAPIs/changeUsername`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            },
+            body: JSON.stringify({
+                username: newUsername,
+                password: usernamePassword,
+            }),
+        });
+        let message = "";
+        try {
+            const data = await res.json();
+            message = data.detail || data || "";
+        } catch {
+            message = await res.text();
+        }
+        if (!res.ok) {
+            setToastMessage(message);
+            setToastType("error");
+            setShowToast(true);
+            return;
+        }
+        setShowUsernameModal(false);
+        setToastMessage("Felhasználónév sikeresen megváltoztatva.");
+        setToastType("success");
+        setShowToast(true);
+        refreshProfile();
+    } catch (err: any) {
+        setError(err.message);
+    }
+};
+
     if (error) {
         return (
             <div className="profile-page">
@@ -229,6 +270,7 @@ const ProfilePage: React.FC = () => {
                 <button onClick={() => setShowPwdModal(true)}>Jelszó megváltoztatása</button>
                 <button onClick={() => setShowAddressModal(true)}>Cím megváltoztatása</button>
                 <button onClick={() => setShowPhoneModal(true)}>Telefonszám megváltoztatása</button>
+                <button onClick={() => setShowUsernameModal(true)}>Felhasználónév megváltoztatása</button>
             </div>
 
 
@@ -412,6 +454,37 @@ const ProfilePage: React.FC = () => {
                     </div>
                 </div>
             )}
+            {showUsernameModal && (
+                <div className="modal-overlay" onClick={() => setShowUsernameModal(false)}>
+                    <div className="modal" onClick={e => e.stopPropagation()}>
+                        <h3>Felhasználónév megváltoztatása</h3>
+                        {error && <p className="modal-error">{error}</p>}
+                        <form onSubmit={handleUsernameChange}>
+                            <label>Új felhasználónév</label>
+                            <input
+                                type="text"
+                                value={newUsername}
+                                onChange={e => setNewUsername(e.target.value)}
+                                required
+                            />
+                            <label>Jelenlegi jelszó</label>
+                            <input
+                                type="password"
+                                value={usernamePassword}
+                                onChange={e => setUsernamePassword(e.target.value)}
+                                required
+                            />
+                            <div className="modal-buttons">
+                                <button type="submit">Mentés</button>
+                                <button type="button" onClick={() => setShowUsernameModal(false)}>
+                                    Mégse
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+            
         </div>
     );
 };

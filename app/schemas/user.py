@@ -1,6 +1,5 @@
 from typing import Optional
 from pydantic import BaseModel, EmailStr
-
 #--------------------------------------
 class ChangeAddress(BaseModel):
     address: str
@@ -9,21 +8,21 @@ class ChangePhoneNumber(BaseModel):
     phoneNumber: str
 
 class ChangeEmail(BaseModel):
-    email: EmailStr
+    email: str
+    password: str
 
 class ChangeUsername(BaseModel):
     username: str
+    password: str
 
 class ChangePassword(BaseModel):
-    password: str
+    passwordNew: str
+    passwordOld: str
 
 
 #--------------------------------------
-class ListBooks(BaseModel):
-    id: int
-    title: str
-    author: str
-    genre: str
+class searchListBooks(BaseModel):
+    searchText: str = ""
 
 class ListRendtedBooks(BaseModel):
     id: str
@@ -37,19 +36,22 @@ class ListPersonalFines(BaseModel):
 
 #--------------------------------------
 class RentBook(BaseModel):
-    idBook: int
-    idUser: int
+    userName: str
+    bookID: str
+    startDate: str
+    endDate: str
 
 class RentCancel(BaseModel):
-    idRent: int
+    rentID: int
 
 class RentExtend(BaseModel):
-    name: str
+    rentID: int
+    newEndDate: str
 
 
 #--------------------------------------
 class PayFine(BaseModel):
-    id: int
+    fineID: int
 
 class PreRentBook(BaseModel):
     name: str
