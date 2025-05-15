@@ -1,0 +1,19 @@
+
+li, .header-row {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    border-bottom: 0.3rem solid #1f2937;
+    padding: 1em;
+    background-color: #FAFBFC;
+}
+
+li span, .header-row span {
+    flex: 1;
+    display: block;
+}
+
+li button, .header-row span:last-child {
+    min-width: 10vw; /* match button width */
+    padding-left: 1em;
+}

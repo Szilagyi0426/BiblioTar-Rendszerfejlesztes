@@ -48,10 +48,10 @@ const Layout: React.FC = () => {
                     </span>
                 </div>
                 <div className="navbar-center">
-                    <button onClick={() => handleNavigation("/books")}>Könyvek</button>
-                    <button onClick={() => handleNavigation("/fines")}>Büntetések</button>
-                    <button onClick={() => handleNavigation("/reservations")}>Foglalások</button>
-                    <button onClick={() => handleNavigation("/contact")}>Kapcsolat</button>
+                    <button onClick={() => handleNavigation("/books")} className="buttonStyle">Kölcsönözhető könyvek</button>
+                    <button onClick={() => handleNavigation("/fines")}  className="buttonStyle">Büntetések</button>
+                    <button onClick={() => handleNavigation("/reservations")}  className="buttonStyle">Foglalások</button>
+                    <button onClick={() => handleNavigation("/contact")}  className="buttonStyle">Kapcsolat</button>
                 </div>
                 <div className="navbar-right">
                     <div className="profile-wrapper" onClick={() => setDropdownOpen(prev => !prev)}>
