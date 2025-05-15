@@ -28,7 +28,7 @@ const PersonalData: React.FC = () => {
         setToastMessage("");
         setToastType("");
         try {
-            const wholeAddress = `${town}, ${ZIP}, ${address}, ${houseNumber}, ${floor}, ${door}`;
+            const wholeAddress = `${ZIP} ${town}, ${address} ${houseNumber}${floor ? ` ${floor}` : ""}${door ? `/${door}` : ""}`;
             await setPersonalData(wholeAddress, phoneNumber);
             setToastMessage("Személyes adatok sikeresen beállítva!");
             setToastType("success");

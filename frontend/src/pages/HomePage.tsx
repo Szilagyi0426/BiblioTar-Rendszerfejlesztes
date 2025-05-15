@@ -1,16 +1,15 @@
-import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
+import { useAuthRedirect } from "../utils/useAuthRedirect";
+
 
 
 const HomePage: React.FC = () => {
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        const token = localStorage.getItem("access_token");
-        if (!token) {
-            navigate("/");
-        }
-    }, [navigate]);
+    const profile = useAuthRedirect();
+    
+    if (!profile) {
+        return <p>Betöltés...</p>;
+    }
+    
     return (
         <div>
             <h1>Welcome to the Home Page!</h1>
